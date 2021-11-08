@@ -1,6 +1,12 @@
 import random as rn
-import sympy as sp
-import math
+from Crypto.Util import number
+
+
+# Euclidean Algorithm
+def gcd(x, y):
+    while y:
+        x, y = y, x % y
+    return x
 
 
 def rsa(m):
@@ -10,24 +16,26 @@ def rsa(m):
     print("The Message Value is: ", m)
     print()
     print('\033[1m' + 'Generation of Public and Private Keys' + '\033[0m')
-    p = sp.randprime(1, 100000)
-    print('The Prime Number P is: ', p)
-    q = sp.randprime(1, 100000)
-    print('The Prime Number Q is: ', q)
+    p = number.getPrime(1024)
+    print('The Prime Number P (1024-bit) is: ', p)
+    q = number.getPrime(1024)
+    print('The Prime Number Q (1024-bit) is: ', q)
     n = p * q
-    print('The Value of N(common modulus) is: ', n)
+    print('The Value of N(common modulus) (2048-bit) is: ', n)
     dn = (p - 1) * (q - 1)
     print('The Value of pi(n) is: ', dn)
-
-    def ev():
-        global e
-        e = rn.getrandbits(10)
-        if 1 < e < dn and math.gcd(e, dn) == 1:
-            print("The Public Key is: ", e)
+    e = rn.getrandbits(20)
+    while e < dn:
+        if gcd(e, dn) == 1:
+            break
         else:
-            ev()
-    ev()
-    d = pow(e, -1, dn)
+            e += 1
+
+    t = 2
+    while (1 + (t * dn)) % e != 0:
+        t += 1
+    d = int((1 + (t * dn)) // e)
+    print("The Public Key is: ", e)
     print("The Private Key is: ", d)
     v = (d*e) % dn
     print("The Proof Verification of (D*E)%pi(n) is: ", v)
@@ -42,5 +50,5 @@ def rsa(m):
     print('NOTE: Here all the values are automatically generated')
 
 
-message = rn.randint(1, 100)
+message = rn.getrandbits(100)
 rsa(message)
